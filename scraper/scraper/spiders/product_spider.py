@@ -1,18 +1,10 @@
 import json
 import re
 import urllib.parse
-<<<<<<< HEAD
-from multiprocessing import Process, Queue
-
-import math
-import scrapy
-import scrapy.crawler as crawler
-=======
 from multiprocessing import Process
 
 import math
 import scrapy
->>>>>>> origin/master
 from billiard import Process
 from scrapy import signals
 from scrapy.crawler import Crawler
@@ -119,11 +111,7 @@ class ProductSpider(scrapy.Spider):
 
             status = response.meta['status']
             if status == 'create':
-<<<<<<< HEAD
                 mail_has_been_sent = price <= desired_price  # to prevent sending an email when creating a product
-=======
-                mail_has_been_sent = price <= desired_price  # to prevent sending an email
->>>>>>> origin/master
                 # create object
                 Product.objects.create(image=image,
                                        title=title,

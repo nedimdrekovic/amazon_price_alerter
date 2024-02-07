@@ -60,120 +60,6 @@ def send_email(url, price, desired_price):
         smtp.sendmail(email_sender, email_receiver, em.as_string())
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
-def scrape_image(soup):
-    # children = soup.find('div', {'id': "img-canvas"})
-    new_product_image = "NA"
-    children = soup.find_all("div", {"id": "imgTagWrapperId"})
-    if children == None:
-        new_product_image = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png"
-    else:
-        # children = children.findChildren('img')
-        # new_product_image = children[-1].find("div", {"img", "src"})
-        pass
-
-    # children = children.find('img', recursive=False)
-    if children:
-        if type(children) == list:
-            new_product_image = children[-1].find("img")['src']
-        else:
-            new_product_image = children[-1].find("img")['src']
-    else:  # other method
-        children = soup.find_all("div", {"class": "imgTagWrapper"})
-        """  tag = soup.find(id="imgTagWrapperId")
-        if tag is not None:
-            children = tag.find("img", recursive=False)
-            for child in children:
-                if child.has_attr('src'):
-                    new_product_image = child['src']"""
-        # "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png"
-    return new_product_image
-
-
-def scrape_title(soup):
-    # am besten schon vorher in Liste einfuegen, damit nicht immer in Webseite
-    # gesucht werden muss und Ladezeiten somit nicht unnoetig lang sind
-    try:
-        new_product_title = soup.find("span", attrs={"id": 'productTitle'}).string.strip()
-        # Erscheinungsdatum: id=productSubtitle
-        # product_title = product_title.string.strip().replace(',', ''
-        print("-" * 50)
-    except AttributeError:
-        new_product_title = "NA"
-    return new_product_title
-
-
-def scrape_price(soup):
-    # alle Daten aus Datenbank in Tabelle einfügen, bis auf Preis.
-    # Preis jedes Mal bei Aufruf aus Amazon-Webseite ausfiltern und vergleichen ob
-    # sich Wert veraendert hat
-    try:
-        new_product_price_v0 = soup.find("span", attrs={'class': 'a-color-price'})
-        new_product_price_v1 = soup.find("span", attrs={'class': 'a-offscreen'})
-        new_product_price_v2 = soup.find("span", attrs={'class': 'aok-offscreen'})
-        new_product_price_v3 = soup.find("span", attrs={'id': "price"})  # .text  # aktueller Preis
-        # new_product_price_v4 = soup.find("span", attrs={'class': "a-price-whole"})  # aktueller Preis
-        new_product_price_v5 = soup.find("span", attrs={'aria-hidden': "true"})  # aktueller Preis
-
-        # checking multiple methods to
-        new_product_price_list = [new_product_price_v0,
-                                  new_product_price_v1,
-                                  new_product_price_v2,
-                                  new_product_price_v3,
-                                  # new_product_price_v4,
-                                  new_product_price_v5]
-        price_is_found = [True if price_found is not None else False for price_found in new_product_price_list]
-        if any(price_is_found):  # if price is found / product is available
-            # iterate over different methods that find the price tag for the product
-            prices = []
-            for i, price_found in enumerate(price_is_found):
-                if price_found:
-                    price = new_product_price_list[i].text.replace(" ", "")
-                    prices.append(price)
-
-            # set price for the first solution that's been found and skip every other solution
-            new_product_price = ""
-            for price in prices:
-                if "nicht verfügbar" in price:
-                    new_product_price = "Derzeit nicht verfügbar."
-                if "€" in price:  # get first found solution
-                    new_product_price = price
-                    break
-        else:  # if there is no price found
-            new_product_price = "NA"
-
-        """
-            new_product_price = soup.find("span", attrs={'class': "a-price-whole"})  # aktueller Preis
-            price_tags = new_product_price.find_next_siblings()  # get next tags which includes n digits of price
-            new_product_price = new_product_price.text
-            for tag in price_tags:
-                new_product_price += "" + tag.text"""
-
-        new_product_price = new_product_price.replace(",", ".")
-        new_product_price = new_product_price.split("€")[0]
-        if new_product_price not in ["", "NA"]:
-            new_product_price = float(new_product_price)  # converting string to number
-
-    except AttributeError:
-        new_product_price = "NA"
-    except ValueError:
-        print("Kein Preis für das Produkt gefunden.")
-        new_product_price = "NA"
-    return new_product_price
-
-
-def scrape_product_data(soup):
-    # scrape data for each property carefully to find data in most cases
-    new_product_image = scrape_image(soup)
-    new_product_title = scrape_title(soup)
-    new_product_price = scrape_price(soup)
-
-    return new_product_image, new_product_title, new_product_price
-
-
 @csrf_exempt
 def delete_prod(request):
     """
@@ -191,12 +77,6 @@ def delete_prod(request):
 def show_webpage(request):
     """ Renders template which presents the actual website to the user."""
     return render(request, 'products/product_list.html')
-
-
-def crawl():
-    crawler = CrawlerProcess(get_project_settings())
-    crawler.crawl(ProductSpider)
-    crawler.start(stop_after_crawl=False)
 
 
 @csrf_exempt
@@ -229,25 +109,8 @@ def product_list(request):
             Product.objects.filter(url=product['url']).update(mail_has_been_sent=True)
         Product.objects.filter(url=product['url']).update(price=product['price'])
 
-<<<<<<< HEAD
-    """# quick checking if scraping went successfully by simply checking if product has any empty value for the attributes
-    for product in list(Product.objects.all().values()):
-        for product_property, product_value in product.items():
-            if product_value == "":
-                print("product has not been scraped successfully.", product_property, "couldn't be found.")"""
-
-    for product in Product.objects.all().values():
-        if float(product['price']) <= float(product['desired_price']):
-            if not product['mail_has_been_sent']:
-                print("Send mail.")
-                # send_email(product['url'], product['price'], product['desired_price'])
-                Product.objects.filter(url=product['url']).update(mail_has_been_sent=True)
-
-=======
->>>>>>> origin/master
     products = list(Product.objects.all().values())
     return JsonResponse({'products': products, 'status': status})
-
 
 
 def max_price_is_valid(max_price):
