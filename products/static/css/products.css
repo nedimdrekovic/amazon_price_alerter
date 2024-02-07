@@ -1,0 +1,117 @@
+/* for all tables */
+table {
+    border: 5px solid black;
+    font: 16px "Open Sans", Helvetica, Arial, sans-serif;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+}
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+thead > tr {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgb(228, 240, 245);
+    text-align: center;
+}
+
+/* for all table entries */
+th, td, tr:nth-child(3) {
+    border: 5px solid black;
+    padding: 4px 6px;
+}
+
+a {
+    max-width: 50px;
+    max-height: 40px;
+    overflow: hidden;
+}
+
+/* for the header of the page */
+.page-header {
+    background-color: #4E69E4; /* #C25100; */
+    margin-top: 0;
+    margin-bottom: 40px;
+    padding: 20px 20px 20px 40px;
+}
+
+/* for all images embedded in tables */
+td img{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* properties for text input cells (e.g. preferred price) */
+input[type="text"], textarea {
+  background-color: #d1d1d1;
+  width: 50px;
+}
+
+/* position price label and euro symbol next to each other */
+input, p {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 10px 0;
+}
+
+div {
+    display: block;
+    text-align: center;
+}
+
+div label {
+    display: block;
+}
+
+.padding-table-columns td {
+    padding:0 5px 0 0; /* Only right padding*/
+}
+
+
+/* CSS */
+.button1 {
+    background-color: white;
+    color: black;
+    border: 2px solid #4CAF50;
+}
+
+
+.button {
+    display: inline-block;
+    padding: .75rem 1.25rem;
+    border-radius: 10rem;
+    color: #0000ff;
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: .15rem;
+    transition: all .3s;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    font-family: 'Courier New', monospace;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

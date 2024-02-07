@@ -1,0 +1,191 @@
+{% extends 'products/base.html' %}
+{% block content %}
+
+    <body onload="load()" style="background-color:#64b05b">
+        <header class="page-header">
+            <div class="container" style="text-align:center">
+                <h1 style="text-align:center" style="color:green"><b>Amazon Price Alert App</b></h1>
+            </div>
+        </header>
+
+        <center>
+            <p style='font-size: 40px; color:#0000ff;' id="product_message"></p>
+            <div float="left" style="text-align:center">
+                <p style='display: inline-block; font-size:40px;'>Amazon-Link:</p>
+                <input id="amzn_url" name="amzn_url" style="display: inline-block; width: 800px; height: 40px; font-size:30px;">
+                <br>
+                <p style='font-size:40px;'>Wunschpreis:</p>
+                <input id="desired_price" name="desired_price" style="width: 100px; height: 40px; font-size:30px; text-align: center">
+                <p style='display: inline-block; font-size:40px;'>€</p>
+            </div>
+            <br>
+            <button id="add_product_to_list" type="submit" name="add_product_btn" value="add_btn" class='button'>Hinzufügen</button>
+        </center>
+
+            <table className="padding-table-columns" class="styled-table" style="background-color:#ffc09f">
+                <!-- data attribute names -->
+                <thead>
+                    <tr>
+                        <th style="width:5%;">Bild</th>
+                        <th style="width:10%">Titel</th>
+                        <th style="width:5%">URL</th>
+                        <th style="width:5%">Aktueller Preis</th>
+                        <th style="width:10%">Wunschpreis</th>
+                        <th style="width:5%">Löschen</th>
+                    </tr>
+                </thead>
+
+
+                <!-- data sets -->
+                <tbody class="product_body">
+
+                </tbody>
+            </table>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var port = 7000;
+        function load() {
+            // refresh page every x seconds
+            //var refresh_time_seconds = 60;
+            //setTimeout("window.open('http://127.0.0.1:' + port.toString(), '_self');", refresh_time_seconds * 1000);
+        }
+
+        function get_new_product_entry(product_image, product_title, product_url, product_price, product_desired_price) {
+            var price_color = "black"
+
+            product_price = Number(product_price)
+            product_desired_price = Number(product_desired_price).toFixed(2) // allowing only 2 decimal digits
+            if (product_price <= product_desired_price) {
+                price_color = 'green'
+            }
+
+            var product_tag = `
+                <tr style="text-align: center">
+                    <td>
+                        <img style='size height:200px; width:125px' src=${product_image}>
+                    </td>
+                    <td>
+                        ${product_title}
+                    </td>
+                    <td>
+                        <a href=${product_url} style="word-wrap:break-word;">${product_url}</a>
+                    </td>
+                    <td>
+                        <font face='cursive,serif' style="color:${price_color}" size="8px">${product_price}€</font>
+                    </td>
+                    <td>
+                        <font face='cursive,serif' size="8px">${product_desired_price}€</font>
+                    </td>
+                    <td>
+                        <button type='submit' value='delete' id='delete_btn'>Entfernen</button>
+                    </td>
+                </tr>
+            `
+            return product_tag
+        }
+
+
+            $(document).ready(function () {
+                // reload page every 30 seconds to scrape data of amazon product
+
+                function refresh() {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/product_list/',
+                        success: function(data) {
+                            console.log("Refresh.")
+                            var seconds = 20
+                            setTimeout(refresh, seconds * 1000);
+                        }
+                    });
+                }
+                $(function(){
+                    refresh();
+                });
+
+
+
+                /* List product list */
+                $.ajax({
+                    type: 'GET',
+                    url: '/product_list/',
+                    dataType: 'json',
+                }).done(function (response) {
+                    if (response['status'] == "data_not_found") {
+                        document.getElementById('product_message').innerHTML = "Daten konnten nicht geupdatet werden. Bitte erneut versuchen."
+                    }
+                    for (var product of response['products']) {
+                        product_entry = get_new_product_entry(
+                            product['image'], product['title'], product['url'], product['price'], product['desired_price'])
+                        $('.product_body').append(product_entry)
+                    }
+                });
+
+                // event called when add button is clicked
+                $('#add_product_to_list').click(function (e) {
+                    /* Event after clicking button to add product */
+                    e.preventDefault();
+                    var amzn_url = $('#amzn_url').val();
+                    var desired_price = $('#desired_price').val();
+
+                    // send a GET request to build the list of todos
+                    $.ajax({
+                        url: '/add_product/',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            'amzn_url': amzn_url,
+                            'desired_price': desired_price
+                        },
+                    }).done(function (product) {
+                        message = ""
+                        if (product['status'] == 'new_product_created') {
+                            // check if product contains all attributes (later)
+                            new_product = get_new_product_entry(
+                                product['image'], product['title'], product['url'], product['price'], product['desired_price'])
+                            $('.product_body').append(new_product)
+                        } else {
+                            if (product['status'] == 'is_already_in_list') {
+                                message = "Dieses Produkt befindet sich bereits in deiner Liste."
+                            } else if (product['status'] == "already_under_limit_price") {
+                                message = "Der aktuelle Preis des Produkts ist bereits unter dem gewünschten Preis. " +
+                                    "Öffne den Link und kaufe das Produkt."
+                                document.getElementById('product_message').style = 'font-size: 20px; color:#0000ff;'
+                            } else if (product['status'] == "only_numbers") {
+                                message = 'Es sind nur numerische Werte für das Wunschpreis-Feld erlaubt.'
+                            } else if (product['status'] == "empty_input_field") {
+                                message = 'Nur Zahlen in Preisfeld eingeben.'
+                            } else if (product['status'] == 'not_existing') {
+                                message = 'Webseite existiert nicht.'
+                            }
+                        }
+                        document.getElementById('product_message').innerHTML = message
+                    })
+                    $('#amzn_url').val('') // reset the input field
+                    $('#desired_price').val('') // reset the input field
+                });
+
+                // called when delete button is clicked
+                $('tbody').on('click', '#delete_btn', function(event) {
+                    event.stopPropagation()
+                    var current_product = $(this).parent().parent()
+                    var current_product_link = current_product.find('a').text() // find unique element which is the url link
+
+                    $.ajax({
+                        url: "/delete_product/",
+                        type: 'POST',
+                        data: {
+                          'current_product_link': current_product_link,
+                        },
+                    }).done(function(response) {
+                        if (response['status'] === 'deleted') {
+                            current_product.remove()
+                        }
+                    })
+                })
+            })
+    </script>
+    </body>
+
+{% endblock %}

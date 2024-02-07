@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Django Girls blog</title>
+        <link rel="stylesheet" href="{% static 'css/products.css' %}">
+    </head>
+        <!-- data sets -->
+        {% block content %}
+        {% endblock %}
+
+
+
+    <!--
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+            function juckt() {
+                var bla = $('amzn_url').val();
+                console.log("Bla", bla);
+            }
+            function send_value(){
+                 $.ajax({
+                     url: '/target_view/',
+                     method : 'POST',
+                     data: {quantity: $('#theInput').val()},
+                     beforeSend: function() {
+                      // things to do before submit
+                     },
+                     success: function(response) {
+                        alert(response)
+                     }
+                 });
+             }
+
+             $('#username_exists_form').on('submit',function(e){
+                e.preventDefault();
+                var username = $(this).find('input').val();
+                $.get('/exists/',
+                      {'username': username},
+                      function(response){ $('#response_msg').text(response.msg); }
+                );
+             });
+
+             function btn_click() {
+                 var x = [document.getElementById('amzn_url').value, document.getElementById('desired_price').value]
+                 console.log(document.getElementById('amzn_url').value)
+                 return x
+             }
+        </script>
+        -->
+
+</html>
